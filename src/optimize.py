@@ -5,6 +5,7 @@ import tensorflow as tf, numpy as np, os
 import transform
 import random
 from utils import get_img
+from tqdm import tqdm
 
 STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_2', 'relu4_2', 'relu5_2')
 CONTENT_LAYER = 'relu4_2'
@@ -100,7 +101,7 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         for epoch in range(epochs):
             num_examples = len(content_targets)
             iterations = 0
-            while iterations * batch_size < num_examples:
+            for ite in tqdm(range(int(num_examples/batch_size))):
                 start_time = time.time()
                 curr = iterations * batch_size
                 step = curr + batch_size
