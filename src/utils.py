@@ -57,7 +57,7 @@ def list_files(in_path):
 def duration_to_seconds(duration):
     """Duration is of the form 00:21:19.50"""
     (hms, millis) = duration.split('.')
-    (h, m, s) = map(lambda x: int(x), hms.split(':'))
+    (h, m, s) = list(map(lambda x: int(x), hms.split(':')))
     return h * 3600 + m * 60 + s
 
 
@@ -65,7 +65,7 @@ def get_images(dir_path):
     """Loads all images in the path"""
     images_path = [dir_path + fname for fname in list_files(dir_path)]
     print("Loading %s" % images_path)
-    return map(get_img, images_path)
+    return list(map(get_img, images_path))
 
 def sample_video(in_path, n_samples=20):
     """Extracts the samples from provided video and returns them"""
