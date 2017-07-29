@@ -74,8 +74,9 @@ def optimize(content_targets, style_target, content_weight, style_weight,
             net[CONTENT_LAYER] - content_features[CONTENT_LAYER]) / content_size
         )
 
-        style_losses = []
+        train_steps = []
         for style_features in style_features_arr:
+            style_losses = []
             for style_layer in STYLE_LAYERS:
                 layer = net[style_layer]
                 bs, height, width, filters = map(lambda i:i.value,layer.get_shape())
@@ -85,19 +86,22 @@ def optimize(content_targets, style_target, content_weight, style_weight,
                 style_gram = style_features[style_layer]
                 style_losses.append(2 * tf.nn.l2_loss(grams - style_gram)/style_gram.size)
 
-        style_loss = style_weight * functools.reduce(tf.add, style_losses) / batch_size / len(style_features)
+            style_loss = style_weight * functools.reduce(tf.add, style_losses) / batch_size
 
-        # total variation denoising
-        tv_y_size = _tensor_size(preds[:,1:,:,:])
-        tv_x_size = _tensor_size(preds[:,:,1:,:])
-        y_tv = tf.nn.l2_loss(preds[:,1:,:,:] - preds[:,:batch_shape[1]-1,:,:])
-        x_tv = tf.nn.l2_loss(preds[:,:,1:,:] - preds[:,:,:batch_shape[2]-1,:])
-        tv_loss = tv_weight*2*(x_tv/tv_x_size + y_tv/tv_y_size)/batch_size
+            # total variation denoising
+            tv_y_size = _tensor_size(preds[:,1:,:,:])
+            tv_x_size = _tensor_size(preds[:,:,1:,:])
+            y_tv = tf.nn.l2_loss(preds[:,1:,:,:] - preds[:,:batch_shape[1]-1,:,:])
+            x_tv = tf.nn.l2_loss(preds[:,:,1:,:] - preds[:,:,:batch_shape[2]-1,:])
+            tv_loss = tv_weight*2*(x_tv/tv_x_size + y_tv/tv_y_size)/batch_size
 
-        loss = content_loss  + style_loss + tv_loss
+            loss = content_loss  + style_loss + tv_loss
 
-        # overall loss
-        train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+            # overall loss
+            train_step = tf.train.AdamOptimizer(learning_rate).minimize(loss)
+
+            train_steps.append(train_step)
+
         sess.run(tf.global_variables_initializer())
 
         uid = random.randint(1, 100)
@@ -121,7 +125,7 @@ def optimize(content_targets, style_target, content_weight, style_weight,
                    X_content:X_batch
                 }
 
-                train_step.run(feed_dict=feed_dict)
+                train_steps[(ite+epoch)%len(train_steps)].run(feed_dict=feed_dict)
                 end_time = time.time()
                 delta_time = end_time - start_time
                 if debug:

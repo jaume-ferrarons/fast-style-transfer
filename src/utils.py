@@ -55,7 +55,7 @@ def list_files(in_path):
 
 
 def duration_to_seconds(duration):
-    """Duration is of the form 00:21:19.50"""
+    """Duration is of the form: 00:21:19.50"""
     (hms, millis) = duration.split('.')
     (h, m, s) = list(map(lambda x: int(x), hms.split(':')))
     return h * 3600 + m * 60 + s
