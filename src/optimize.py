@@ -23,14 +23,14 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         print("Train set has been trimmed slightly..")
         content_targets = content_targets[:-mod] 
 
-    style_features = {}
+    style_features_arr = []
 
     if not slow:
         batch_shape = (batch_size,256,256,3)
     else:
         batch_shape = (1,) + get_img(content_targets[0]).shape
 
-    style_shape = (1,) + style_target.shape
+    style_shape = (1,) + style_target[0].shape
     print(style_shape)
 
     # precompute style features
@@ -38,12 +38,15 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         style_image = tf.placeholder(tf.float32, shape=style_shape, name='style_image')
         style_image_pre = vgg.preprocess(style_image)
         net = vgg.net(vgg_path, style_image_pre)
-        style_pre = np.array([style_target])
-        for layer in STYLE_LAYERS:
-            features = net[layer].eval(feed_dict={style_image:style_pre})
-            features = np.reshape(features, (-1, features.shape[3]))
-            gram = np.matmul(features.T, features)
-            style_features[layer] = gram
+        for target in style_target:
+            style_pre = np.array([target])
+            style_features = {}            
+            for layer in STYLE_LAYERS:
+                features = net[layer].eval(feed_dict={style_image:style_pre})
+                features = np.reshape(features, (-1, features.shape[3]))
+                gram = np.matmul(features.T, features)
+                style_features[layer] = gram
+            style_features_arr.append(style_features)
 
     with tf.Graph().as_default(), tf.Session() as sess:
         X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
@@ -72,16 +75,17 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         )
 
         style_losses = []
-        for style_layer in STYLE_LAYERS:
-            layer = net[style_layer]
-            bs, height, width, filters = map(lambda i:i.value,layer.get_shape())
-            feats = tf.reshape(layer, (bs, height * width, filters))
-            feats_T = tf.transpose(feats, perm=[0,2,1])
-            grams = tf.matmul(feats_T, feats)
-            style_gram = style_features[style_layer]
-            style_losses.append(2 * tf.nn.l2_loss(grams - style_gram)/style_gram.size)
+        for style_features in style_features_arr:
+            for style_layer in STYLE_LAYERS:
+                layer = net[style_layer]
+                bs, height, width, filters = map(lambda i:i.value,layer.get_shape())
+                feats = tf.reshape(layer, (bs, height * width, filters))
+                feats_T = tf.transpose(feats, perm=[0,2,1])
+                grams = tf.matmul(feats_T, feats)
+                style_gram = style_features[style_layer]
+                style_losses.append(2 * tf.nn.l2_loss(grams - style_gram)/style_gram.size)
 
-        style_loss = style_weight * functools.reduce(tf.add, style_losses) / batch_size
+        style_loss = style_weight * functools.reduce(tf.add, style_losses) / batch_size / len(style_features)
 
         # total variation denoising
         tv_y_size = _tensor_size(preds[:,1:,:,:])

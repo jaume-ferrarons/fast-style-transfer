@@ -4,7 +4,7 @@ sys.path.insert(0, 'src')
 import numpy as np, scipy.misc 
 from optimize import optimize
 from argparse import ArgumentParser
-from utils import save_img, get_img, exists, list_files
+from utils import save_img, get_media, exists, list_files
 import evaluate
 
 CONTENT_WEIGHT = 7.5e0
@@ -114,7 +114,7 @@ def main():
     options = parser.parse_args()
     check_opts(options)
 
-    style_target = get_img(options.style)
+    style_target = get_media(options.style)
     if not options.slow:
         content_targets = _get_files(options.train_path)
     elif options.test:

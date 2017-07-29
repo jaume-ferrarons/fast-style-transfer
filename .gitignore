@@ -1,5 +1,6 @@
 t Byte-compiled / optimized / DLL files
 test_dir
+.tmp
 run.sh
 deps.txt
 archive
