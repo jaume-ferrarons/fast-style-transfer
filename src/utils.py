@@ -1,3 +1,4 @@
+from __future__ import print_function
 import scipy.misc
 import numpy as np
 import os
@@ -27,7 +28,7 @@ def get_media(src):
     elif src[-4:] == ".mp4":
         return sample_video(src)
     else:
-        print "Reading image", src
+        print("Reading image %s" % src)
         return [get_img(src)]
 
 
@@ -63,7 +64,7 @@ def duration_to_seconds(duration):
 def get_images(dir_path):
     """Loads all images in the path"""
     images_path = [dir_path + fname for fname in list_files(dir_path)]
-    print "Loading", images_path
+    print("Loading %s" % images_path)
     return map(get_img, images_path)
 
 def sample_video(in_path, n_samples=20):
@@ -79,10 +80,10 @@ def sample_video(in_path, n_samples=20):
                     "2>&1 | grep Duration | awk '{print $2}' | tr -d , >", DURATION_FILE])
     subprocess.call(cmd, shell=True)
     duration = open(DURATION_FILE, 'r').readline().strip()
-    print "Video duration:", duration, "seconds"
+    print("Video duration: %s" % duration)
     seconds = duration_to_seconds(duration)
     sample_cmd = ' '.join(["ffmpeg -i", in_path, '-vf fps=%d/%d' %
                            (n_samples, seconds), TMP_VIDEO_SAMPLES + "out%d.png"])
-    print "Taking sample"
+    print("Taking sample")
     subprocess.call(sample_cmd, shell=True)
     return get_images(TMP_VIDEO_SAMPLES)
