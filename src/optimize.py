@@ -7,7 +7,7 @@ import random
 from utils import get_img
 from tqdm import tqdm
 
-STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_2', 'relu4_2', 'relu5_2')
+STYLE_LAYERS = ('relu1_1', 'relu2_1', 'relu3_1', 'relu4_1', 'relu5_1')
 CONTENT_LAYER = 'relu4_2'
 DEVICES = 'CUDA_VISIBLE_DEVICES'
 
@@ -25,11 +25,7 @@ def optimize(content_targets, style_target, content_weight, style_weight,
 
     style_features_arr = []
 
-    if not slow:
-        batch_shape = (batch_size,256,256,3)
-    else:
-        batch_shape = (1,) + get_img(content_targets[0]).shape
-
+    batch_shape = (batch_size,256,256,3)
     style_shape = (1,) + style_target[0].shape
     print(style_shape)
 
@@ -44,11 +40,11 @@ def optimize(content_targets, style_target, content_weight, style_weight,
             for layer in STYLE_LAYERS:
                 features = net[layer].eval(feed_dict={style_image:style_pre})
                 features = np.reshape(features, (-1, features.shape[3]))
-                gram = np.matmul(features.T, features)
+                gram = np.matmul(features.T, features) / features.size
                 style_features[layer] = gram
             style_features_arr.append(style_features)
 
-    with tf.Graph().as_default(), tf.Session() as sess:
+    with tf.Graph().as_default(), tf.device('/cpu:0'), tf.Session() as sess:
         X_content = tf.placeholder(tf.float32, shape=batch_shape, name="X_content")
         X_pre = vgg.preprocess(X_content)
 
@@ -80,9 +76,10 @@ def optimize(content_targets, style_target, content_weight, style_weight,
             for style_layer in STYLE_LAYERS:
                 layer = net[style_layer]
                 bs, height, width, filters = map(lambda i:i.value,layer.get_shape())
+                size = height * width * filters
                 feats = tf.reshape(layer, (bs, height * width, filters))
                 feats_T = tf.transpose(feats, perm=[0,2,1])
-                grams = tf.matmul(feats_T, feats)
+                grams = tf.matmul(feats_T, feats) / size
                 style_gram = style_features[style_layer]
                 style_losses.append(2 * tf.nn.l2_loss(grams - style_gram)/style_gram.size)
 
@@ -115,8 +112,7 @@ def optimize(content_targets, style_target, content_weight, style_weight,
                 step = curr + batch_size
                 X_batch = np.zeros(batch_shape, dtype=np.float32)
                 for j, img_p in enumerate(content_targets[curr:step]):
-                    resize_shape = (256,256,3) if not slow else False
-                    X_batch[j] = get_img(img_p, resize_shape).astype(np.float32)
+                   X_batch[j] = get_img(img_p, (256,256,3)).astype(np.float32)
 
                 iterations += 1
                 assert X_batch.shape[0] == batch_size

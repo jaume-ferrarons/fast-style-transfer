@@ -9,7 +9,7 @@ import evaluate
 
 CONTENT_WEIGHT = 7.5e0
 STYLE_WEIGHT = 1e2
-TV_WEIGHT = 1e0
+TV_WEIGHT = 2e2
 
 LEARNING_RATE = 1e-3
 NUM_EPOCHS = 2
@@ -158,7 +158,7 @@ def main():
                 evaluate.ffwd_to_img(options.test,preds_path,
                                      options.checkpoint_dir)
             else:
-                save_img(preds_path, preds[0])
+                save_img(preds_path, img)
     ckpt_dir = options.checkpoint_dir
     cmd_text = 'python evaluate.py --checkpoint %s ...' % ckpt_dir
     if not options.slow:
