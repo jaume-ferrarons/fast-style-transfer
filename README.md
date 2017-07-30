@@ -1,20 +1,14 @@
-## Fast Style Transfer in [TensorFlow](https://github.com/tensorflow/tensorflow)
+## Fast Style Transfer Extended in [TensorFlow](https://github.com/tensorflow/tensorflow)
 
-Add styles from famous paintings to any photo in a fraction of a second! [You can even style videos!](#video-stylization)
+Add styles from paintings and videos to any photo in a fraction of a second! [You can even style videos!](#video-stylization)
 
 <p align = 'center'>
 <img src = 'examples/style/udnie.jpg' height = '246px'>
 <img src = 'examples/content/stata.jpg' height = '246px'>
 <a href = 'examples/results/stata_udnie.jpg'><img src = 'examples/results/stata_udnie_header.jpg' width = '627px'></a>
 </p>
-<p align = 'center'>
-It takes 100ms on a 2015 Titan X to style the MIT Stata Center (1024×680) like Udnie, by Francis Picabia.
-</p>
 
 Our implementation is based off of a combination of Gatys' [A Neural Algorithm of Artistic Style](https://arxiv.org/abs/1508.06576), Johnson's [Perceptual Losses for Real-Time Style Transfer and Super-Resolution](http://cs.stanford.edu/people/jcjohns/eccv16/), and Ulyanov's [Instance Normalization](https://arxiv.org/abs/1607.08022). 
-
-#### Don't have access to a GPU but want to train a style or transform large batches of images?
-Contact me at engstrom@mit.edu for rates.
 
 ## Video Stylization 
 Here we transformed every frame in a video, then combined the results. [Click to go to the full demo on YouTube!](https://www.youtube.com/watch?v=xVJwwWQlQ1o) The style here is Udnie, as above.
@@ -90,23 +84,17 @@ You will need the following to run the above:
   - All the required NVIDIA software to run TF on a GPU (cuda, etc)
 - ffmpeg 3.1.3 if you want to stylize video
 
-### Citation
-```
-  @misc{engstrom2016faststyletransfer,
-    author = {Logan Engstrom},
-    title = {Fast Style Transfer},
-    year = {2016},
-    howpublished = {\url{https://github.com/lengstrom/fast-style-transfer/}},
-    note = {commit xxxxxxx}
-  }
-```
-
 ### Attributions/Thanks
-- This project could not have happened without the advice (and GPU access) given by [Anish Athalye](http://www.anishathalye.com/). 
+- This project could not have happened without the work of Logan Engstrom in [Fast Style Transfer](https://github.com/lengstrom/fast-style-transfer). 
   - The project also borrowed some code from Anish's [Neural Style](https://github.com/anishathalye/neural-style/)
 - Some readme/docs formatting was borrowed from Justin Johnson's [Fast Neural Style](https://github.com/jcjohnson/fast-neural-style)
 - The image of the Stata Center at the very beginning of the README was taken by [Juan Paulo](https://juanpaulo.me/)
 
 ### License
+Part of the source codes is has de following License:
 Copyright (c) 2016 Logan Engstrom. Contact me for commercial use (email: engstrom at my university's domain dot edu). Free for research/noncommercial use, as long as proper attribution is given and this copyright notice is retained.
 
+All code and added by me has the following license:
+<center>
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a>
+</center>
